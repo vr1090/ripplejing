@@ -10,11 +10,7 @@
         app:rb_radius="30dp"
         app:rb_rippleAmount="4"
         app:rb_duration="2000"
-        app:rb_scale="10">
-    <ImageView
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_centerInParent="true"
-            android:id="@+id/centerImage"
-            android:src="@color/colorPrimary"/>
+        app:rb_scale="10"
+            android:background="#000000">
+
 </iseng.inu.de.cobaanimasi.AnjingRipple>

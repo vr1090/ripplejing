@@ -11,6 +11,9 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.CycleInterpolator;
+import android.view.animation.OvershootInterpolator;
 import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
@@ -73,8 +76,7 @@ public class AnjingRipple extends RelativeLayout{
         rippleType=typedArray.getInt(R.styleable.RippleBackground_rb_type,DEFAULT_FILL_TYPE);
         typedArray.recycle();
 
-        rippleAmount = 2;
-        rippleDelay=rippleDurationTime/rippleAmount;
+
 
 
 
@@ -86,59 +88,114 @@ public class AnjingRipple extends RelativeLayout{
         animatorList=new ArrayList<Animator>();
 
 
-
-        for(int i=0;i<rippleAmount;i++){
+        rippleAmount = 1;
+        //rippleDelay=rippleDurationTime/rippleAmount;
+        rippleDelay = 1000;
             //paint it ...
-            paint = new Paint();
-            paint.setAntiAlias(true);
-            if(rippleType==DEFAULT_FILL_TYPE){
-                rippleStrokeWidth=0;
-                paint.setStyle(Paint.Style.FILL);
-            }else
-                paint.setStyle(Paint.Style.STROKE);
 
-            if( i%2 == 0) {
-                paint.setColor(Color.parseColor("#FFFF0000"));
-            }else {
-                paint.setColor(Color.parseColor("#FFFFFFFF"));
+
+            final Animator merah= createAnimator(0,2000,"#FFFF0000");
+            final Animator putih = createAnimator(300,1700,"#FFFFFFFF");
+
+            merah.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animator) {
+                    putih.start();
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animator) {
+
+                }
+            });
+
+
+        putih.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animator) {
+
             }
 
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                merah.start();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {
+
+            }
+        });
 
 
-            //bikin ripple view..
-            RippleView rippleView=new RippleView(getContext());
-            rippleView.paint = paint;
-            addView(rippleView,rippleParams);
+        merah.start();
 
-            //add di relativeLayout..
-            rippleViewList.add(rippleView);
+        //animatorSet.playTogether(animatorList);
+    }//end method
 
-            //animator.. scaleX.. sampe gedein berapa kali..
-            final ObjectAnimator scaleXAnimator = ObjectAnimator.ofFloat(rippleView, "ScaleX", 1.0f, rippleScale);
-            scaleXAnimator.setRepeatCount(ObjectAnimator.INFINITE);
-            scaleXAnimator.setRepeatMode(ObjectAnimator.RESTART);
-            scaleXAnimator.setStartDelay(i * rippleDelay);
-            scaleXAnimator.setDuration(rippleDurationTime);
-            animatorList.add(scaleXAnimator);
 
-            //animator scale y .. gendein berapa kali
-            final ObjectAnimator scaleYAnimator = ObjectAnimator.ofFloat(rippleView, "ScaleY", 1.0f, rippleScale);
-            scaleYAnimator.setRepeatCount(ObjectAnimator.INFINITE);
-            scaleYAnimator.setRepeatMode(ObjectAnimator.RESTART);
-            scaleYAnimator.setStartDelay(i * rippleDelay);
-            scaleYAnimator.setDuration(rippleDurationTime);
-            animatorList.add(scaleYAnimator);
+    AnimatorSet createAnimator( int rippleDelay, int rippleDurationTime, String color){
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setStyle( Paint.Style.FILL);
+        if(rippleType==DEFAULT_FILL_TYPE){
+            rippleStrokeWidth=0;
+            paint.setStyle(Paint.Style.FILL);
+        }else
+            paint.setStyle(Paint.Style.STROKE);
 
-//            final ObjectAnimator alphaAnimator = ObjectAnimator.ofFloat(rippleView, "Alpha", 1.0f, 0f);
-//            alphaAnimator.setRepeatCount(ObjectAnimator.INFINITE);
-//            alphaAnimator.setRepeatMode(ObjectAnimator.RESTART);
-//            alphaAnimator.setStartDelay(i * rippleDelay);
-//            alphaAnimator.setDuration(rippleDurationTime);
-//            animatorList.add(alphaAnimator);
-        } // end for loopp
+        paint.setColor(Color.parseColor(color));
+        AnimatorSet anim = new AnimatorSet();
+        ArrayList<Animator> animatorList = new ArrayList<>();
+        RippleView rippleView=new RippleView(getContext());
+        rippleView.paint = paint;
+        addView(rippleView,rippleParams);
 
-        animatorSet.playTogether(animatorList);
-    }
+        //add di relativeLayout..
+        rippleViewList.add(rippleView);
+
+        //animator.. scaleX.. sampe gedein berapa kali..
+        final ObjectAnimator scaleXAnimator = ObjectAnimator.ofFloat(rippleView,"scaleX", 1.0f, rippleScale);
+        //scaleXAnimator.setRepeatCount(ObjectAnimator.INFINITE);
+        //scaleXAnimator.setRepeatMode(ObjectAnimator.REVERSE);
+        scaleXAnimator.setStartDelay(rippleDelay);
+        //scaleXAnimator.setInterpolator(new OvershootInterpolator());
+        scaleXAnimator.setDuration((rippleDurationTime));
+
+
+        animatorList.add(scaleXAnimator);
+
+
+        //animator scale y .. gendein berapa kali
+        final ObjectAnimator scaleYAnimator = ObjectAnimator.ofFloat(rippleView, "ScaleY", 1.0f, rippleScale);
+        //scaleYAnimator.setRepeatCount(ObjectAnimator.INFINITE);
+        //scaleYAnimator.setRepeatMode(ObjectAnimator.REVERSE);
+        scaleYAnimator.setStartDelay(rippleDelay);
+        //scaleYAnimator.setInterpolator(new OvershootInterpolator());
+        scaleYAnimator.setDuration((rippleDurationTime ));
+
+
+        animatorList.add( scaleYAnimator);
+
+        anim.playTogether(animatorList);
+
+        return anim;
+    }//end of method
 
     private class RippleView extends View{
         Paint paint;
@@ -160,8 +217,9 @@ public class AnjingRipple extends RelativeLayout{
             for(RippleView rippleView:rippleViewList){
                 rippleView.setVisibility(VISIBLE);
             }
-            animatorSet.start();
+           animatorSet.start();
             animationRunning=true;
+
         }
     }
 
