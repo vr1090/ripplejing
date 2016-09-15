@@ -10,10 +10,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.CycleInterpolator;
-import android.view.animation.OvershootInterpolator;
+import android.view.animation.*;
 import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
@@ -94,8 +91,8 @@ public class AnjingRipple extends RelativeLayout{
             //paint it ...
 
 
-            final Animator merah= createAnimator(0,2000,"#FFFF0000");
-            final Animator putih = createAnimator(300,1700,"#FFFFFFFF");
+            final Animator merah= createAnimator(0,2000,"#F0FF0000", new LinearInterpolator() );
+            final Animator putih = createAnimator(300,2000,"#FFFFFFFF", new LinearInterpolator());
 
             merah.addListener(new Animator.AnimatorListener() {
                 @Override
@@ -149,7 +146,7 @@ public class AnjingRipple extends RelativeLayout{
     }//end method
 
 
-    AnimatorSet createAnimator( int rippleDelay, int rippleDurationTime, String color){
+    AnimatorSet createAnimator(int rippleDelay, int rippleDurationTime, String color, Interpolator polator){
         Paint paint = new Paint();
         paint.setAntiAlias(true);
         paint.setStyle( Paint.Style.FILL);
@@ -170,11 +167,8 @@ public class AnjingRipple extends RelativeLayout{
         rippleViewList.add(rippleView);
 
         //animator.. scaleX.. sampe gedein berapa kali..
-        final ObjectAnimator scaleXAnimator = ObjectAnimator.ofFloat(rippleView,"scaleX", 1.0f, rippleScale);
-        //scaleXAnimator.setRepeatCount(ObjectAnimator.INFINITE);
-        //scaleXAnimator.setRepeatMode(ObjectAnimator.REVERSE);
-        scaleXAnimator.setStartDelay(rippleDelay);
-        //scaleXAnimator.setInterpolator(new OvershootInterpolator());
+        final ObjectAnimator scaleXAnimator = ObjectAnimator.ofFloat(rippleView,"scaleX", 1.0f, rippleScale);//scaleXAnimator.setRepeatCount(ObjectAnimator.INFINITE);//scaleXAnimator.setRepeatMode(ObjectAnimtor.REVERSE);//scaleXAnimator.setStartDelay(rippleDelay);//scaleXAnimator.setInterpolator(new OverhootInterpolator());
+        //scaleXAnimator.setStartDelay(rippleDelay);
         scaleXAnimator.setDuration((rippleDurationTime));
 
 
@@ -182,17 +176,16 @@ public class AnjingRipple extends RelativeLayout{
 
 
         //animator scale y .. gendein berapa kali
-        final ObjectAnimator scaleYAnimator = ObjectAnimator.ofFloat(rippleView, "ScaleY", 1.0f, rippleScale);
-        //scaleYAnimator.setRepeatCount(ObjectAnimator.INFINITE);
-        //scaleYAnimator.setRepeatMode(ObjectAnimator.REVERSE);
-        scaleYAnimator.setStartDelay(rippleDelay);
-        //scaleYAnimator.setInterpolator(new OvershootInterpolator());
+        final ObjectAnimator scaleYAnimator = ObjectAnimator.ofFloat(rippleView, "ScaleY", 1.0f, rippleScale);//scaleYAnimator.setStartDelay(rippleDelay);//scaleYAnimator.setInterpolator(new OvershootInterpolator());
+        //scaleYAnimator.setStartDelay(rippleDelay);
         scaleYAnimator.setDuration((rippleDurationTime ));
 
 
         animatorList.add( scaleYAnimator);
 
         anim.playTogether(animatorList);
+        anim.setStartDelay(rippleDelay);
+        anim.setInterpolator(polator);
 
         return anim;
     }//end of method
